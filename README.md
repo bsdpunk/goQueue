@@ -5,7 +5,7 @@ kind of a scratch pad for loading a queue of stuff from RabbitMQ in go, hope to 
 # ENV Variables
 
 ```
-export QPASSWORD=hammer
-export QUSER=bsdpunk
-export QHOST=10.1.10.200
+export QPASSWORD=guest
+export QUSER=guest
+export QHOST=127.0.0.1
 ```
