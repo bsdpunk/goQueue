@@ -9,3 +9,9 @@ export QPASSWORD=guest
 export QUSER=guest
 export QHOST=127.0.0.1
 ```
+
+# TO DO
+
+* Send Interpretable Instructions
+* Set up a Go Routine Channel that Shares The Message Queue 
+* Use Instructions on the Go Routine Channel

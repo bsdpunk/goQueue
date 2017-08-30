@@ -83,6 +83,7 @@ func publish(c *amqp.Channel, body string) error {
 }
 
 func main() {
+	//if user
 	conn, err := amqp.Dial(uri)
 	failOnError(err, "Failed to connect to RabbitMQ")
 
