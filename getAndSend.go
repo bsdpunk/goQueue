@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	uri          = flag.String("uri", "amqp://guest:guest@localhost:5672/", "AMQP URI")
+	uri          = string("amqp://guest:guest@10.1.10.200:5672/test")
 	exchange     = flag.String("exchange", "signal-exchange", "Durable, non-auto-deleted AMQP exchange name")
 	exchangeType = flag.String("exchange-type", "direct", "Exchange type - direct|fanout|topic|x-custom")
 	queue        = flag.String("queue", "signal-queue", "Ephemeral AMQP queue name")
@@ -79,7 +79,7 @@ func publish(c *amqp.Channel, body string) error {
 }
 
 func main() {
-	conn, err := amqp.Dial("")
+	conn, err := amqp.Dial(uri)
 	failOnError(err, "Failed to connect to RabbitMQ")
 
 	out, err := json.Marshal(conn)
@@ -92,27 +92,12 @@ func main() {
 	failOnError(err, "Failed to open a channel")
 	q, err := createQueue(ch, "hello")
 	failOnError(err, "CQ")
-	publish(q, "yo")
-	//q, err := ch.QueueDeclare(
-	//	"hello", // name
-	//	false,   // durable
-	//	false,   // delete when unused
-	//	false,   // exclusive
-	//	false,   // no-wait
-	//	nil,     // arguments
-	//)
-	//failOnError(err, "Failed to declare a queue")
+	go func() {
+		for {
+			publish(q, "yo")
+		}
+	}()
 
-	//err = ch.Publish(
-	//	*exchange, // exchange
-	//	"hello",   // routing key
-	//	false,     // mandatory
-	//	false,     // immediate
-	//	amqp.Publishing{
-	//		ContentType: "text/plain",
-	//		Body:        []byte(body),
-
-	//	})
 	op, err := json.Marshal(q)
 	fmt.Println(string(op))
 
