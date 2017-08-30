@@ -6,17 +6,21 @@ import (
 	"fmt"
 	"github.com/streadway/amqp"
 	"log"
+	"os"
 	"time"
 )
 
 var (
-	uri          = string("amqp://guest:guest@10.1.10.200:5672/test")
 	exchange     = flag.String("exchange", "signal-exchange", "Durable, non-auto-deleted AMQP exchange name")
 	exchangeType = flag.String("exchange-type", "direct", "Exchange type - direct|fanout|topic|x-custom")
 	queue        = flag.String("queue", "signal-queue", "Ephemeral AMQP queue name")
 	bindingKey   = flag.String("key", "signal-key", "AMQP binding key")
 	consumerTag  = flag.String("consumer-tag", "signal-consumer", "AMQP consumer")
 	lifetime     = flag.Duration("lifetime", 0*time.Second, "lifetime of process before shutdown (0s=infinite)")
+	user         = string(os.Getenv("QUSER"))
+	pass         = string(os.Getenv("QPASSWORD"))
+	host         = string(os.Getenv("QHOST"))
+	uri          = string("amqp://" + user + ":" + pass + "@" + host + ":5672/test")
 )
 
 func failOnError(err error, msg string) {
