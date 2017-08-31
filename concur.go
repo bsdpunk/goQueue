@@ -115,94 +115,33 @@ func publish(c *amqp.Channel, body string) error {
 func add(c chan string, bod string) {
 	c <- bod
 }
-func sub(c chan string) {
+func sub(c chan string) string {
 	msg := <-c
-	fmt.Println(msg)
-	time.Sleep(time.Second * 1)
-}
-func pinger(c chan string) {
-	for i := 0; ; i++ {
-		c <- "ping"
-	}
-}
-
-func ponger(c chan<- string) {
-
-	for i := 0; ; i++ {
-		c <- "pong"
-	}
-}
-
-func printer(c chan string) {
-	for {
-		msg := <-c
-		fmt.Println(msg)
-		time.Sleep(time.Second * 1)
-	}
+	return msg
 }
 
 func main() {
-	//if user
 	conn, err := amqp.Dial(uri)
 	failOnError(err, "Failed to connect to RabbitMQ")
-	//messages := make(chan string)
-	//var messages chan string = make(chan string)
-	//	out, err := json.Marshal(conn)
-	//body := "hello"
-	//	fmt.Println(string(out))
+	var messages chan string = make(chan string)
 	ch, err := conn.Channel()
-	//	in, err := json.Marshal(ch)
-	//	fmt.Println(string(in))
-
-	//	failOnError(err, "Failed to open a channel")
 	q, err := createQueue(ch, "hello")
 	failOnError(err, "CQ")
-	//	go func() {
-	//		for {
-	//			publish(q, "yo")
-	//		}
-	//	}()
 
-	//	op, err := json.Marshal(q)
-	//	fmt.Println(string(op))
-	//q, err := decQueue(ch, "hello")
 	forever := make(chan bool)
 	msgs, err := consume(q, "hello")
-	//q.Consume(
-	//	"hello", // queue
-	//	"",      // consumer
-	//	true,    // auto-ack
-	//	false,   // exclusive
-	//	false,   // no-local
-	//	false,   // no-wait
-	//	nil,     // args
-	//)
 	failOnError(err, "Failed to register a consumer")
-	var c chan string = make(chan string)
-
-	go pinger(c)
-	go ponger(c)
-	go printer(c)
 
 	go func() {
 		for d := range msgs {
 			log.Printf("Received a message: %s", d.Body)
-			//add(messages, string(d.Body))
-			//sub(messages)
-			//			messages <- string(d.Body)
-			//			msg := <-messages
-			//fmt.Println(string(d.Body))
-			//			time.Sleep(time.Second * 1) //fmt.Println(messages)
+			go add(messages, string(d.Body))
+			go sub(messages)
 		}
 	}()
 
-	//log.Printf(" [x] Sent %s", body)
-	//failOnError(err, "Failed to publish a message")
-	//
 	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
 	<-forever
 	defer ch.Close()
-	//`defer fmt.Println(string(<-messages))
-	//defer q.Close()
 	defer conn.Close()
 }
